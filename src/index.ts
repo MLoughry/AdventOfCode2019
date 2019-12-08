@@ -3,6 +3,7 @@ import log from 'fancy-log'
 import { blue, yellow } from 'ansi-colors';
 import { watch, readFileSync } from 'fs'
 import { resolve } from 'path';
+import { debounce } from 'debounce';
 
 async function main() {
     if (!process.argv[2]) {
@@ -17,16 +18,16 @@ async function main() {
     watch(solverFilePath, {recursive: true})
         .on(
             'change',
-            () => {
+            debounce((_,fileName) => {
                 runSolver(solverFilePath);
-            });
+            }, 50));
 }
 
 main();
 
 async function runSolver(solverDirPath: string) {
     try {
-        delete require.cache[solverDirPath];
+        delete require.cache[require.resolve(solverDirPath)];
         const solver = require(solverDirPath) as SolutionFile;
         const input = readFileSync(resolve(solverDirPath, 'input.txt')).toString();
         console.time('Solver runtime');
