@@ -2,3 +2,4 @@
 /obj
 *.js
 *.js.map
+*.tsbuildinfo
