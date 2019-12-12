@@ -1,3 +1,5 @@
+import { EventEmitter } from "events";
+
 export interface ProgramResult {
   memory: number[];
   outputs?: number[];
@@ -5,10 +7,12 @@ export interface ProgramResult {
 
 export function runProgram(
   program: number[],
-  inputs?: number[]
+  inputs?: number[] | (() => number),
+  onOutput?: EventEmitter
 ): ProgramResult {
   const memory = [...program];
   let ip = 0;
+  let relativeBase = 0;
   const outputs: number[] = [];
 
   while (memory[ip] !== 99) {
@@ -16,28 +20,25 @@ export function runProgram(
     switch (opCode) {
       case 1: {
         // ADD
-        const destAddress = memory[ip + 3];
-        memory[destAddress] = getParameter(1) + getParameter(2);
+        memory[getDestParameter(3)] = getParameter(1) + getParameter(2);
         ip += 4;
         break;
       }
       case 2: {
         // MULT
-        const destAddress = memory[ip + 3];
-        memory[destAddress] = getParameter(1) * getParameter(2);
+        memory[getDestParameter(3)] = getParameter(1) * getParameter(2);
         ip += 4;
         break;
       }
       case 3: {
         // INPUT
-        const destAddress = memory[ip + 1];
-        memory[destAddress] = inputs?.shift()!;
+        memory[getDestParameter(1)] = getInput();
         ip += 2;
         break;
       }
       case 4: {
-        // INPUT
-        outputs.push(getParameter(1));
+        // OUTPUT
+        output(getParameter(1));
         ip += 2;
         break;
       }
@@ -61,14 +62,20 @@ export function runProgram(
       }
       case 7: {
         // less-than
-        memory[memory[ip + 3]] = getParameter(1) < getParameter(2) ? 1 : 0;
+        memory[getDestParameter(3)] = getParameter(1) < getParameter(2) ? 1 : 0;
         ip += 4;
         break;
       }
       case 8: {
         // equals
-        memory[memory[ip + 3]] = getParameter(1) === getParameter(2) ? 1 : 0;
+        memory[getDestParameter(3)] = getParameter(1) === getParameter(2) ? 1 : 0;
         ip += 4;
+        break;
+      }
+      case 9: {
+        // adjust relative base
+        relativeBase += getParameter(1);
+        ip += 2;
         break;
       }
       default:
@@ -85,13 +92,60 @@ export function runProgram(
     parameterIndex: number // 1-based index
   ): number {
     const opCode = memory[ip];
-    const isImmediateMode =
-      Math.floor(opCode / Math.pow(10, parameterIndex + 1)) % 10 === 1;
+    let parameterMode =
+      Math.floor(opCode / Math.pow(10, parameterIndex + 1)) % 10;
 
-    if (isImmediateMode) {
-      return memory[ip + parameterIndex];
-    } else {
-      return memory[memory[ip + parameterIndex]];
+    let parameterValue: number | undefined;
+    switch (parameterMode) {
+      case 0:
+        parameterValue = memory[(memory[ip + parameterIndex] ?? 0)];
+        break;
+      case 1:
+        parameterValue = memory[ip + parameterIndex];
+        break;
+      case 2:
+        parameterValue = memory[relativeBase + (memory[ip + parameterIndex] ?? 0)];
+        break;
+      default:
+        throw new Error(
+          `Invalid parameter mode - opCode: ${opCode}, parameterIndex: ${parameterIndex}, parameterMode: ${parameterMode}`
+        );
     }
+
+    return parameterValue ?? 0;
+  }
+
+  function getDestParameter(
+    parameterIndex: number // 1-based index
+  ): number {
+    const opCode = memory[ip];
+    let parameterMode =
+      Math.floor(opCode / Math.pow(10, parameterIndex + 1)) % 10;
+
+    switch (parameterMode) {
+      case 0:
+        return (memory[ip + parameterIndex] ?? 0);
+        break;
+      case 2:
+        return relativeBase + (memory[ip + parameterIndex] ?? 0);
+        break;
+      default:
+        throw new Error(
+          `Invalid parameter mode for dest parameter - opCode: ${opCode}, parameterIndex: ${parameterIndex}, parameterMode: ${parameterMode}`
+        );
+    }
+  }
+
+  function getInput(): number {
+    if (typeof inputs === "function") {
+      return inputs();
+    } else {
+      return inputs?.shift()!;
+    }
+  }
+
+  function output(out: number): void {
+    outputs.push(out);
+    onOutput?.emit?.("output", out);
   }
 }
