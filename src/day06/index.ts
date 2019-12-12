@@ -65,7 +65,6 @@ class PlanetarySystem {
     const distanceFromYou = new Map<Planet, number>([[YOU.orbiting!, 0]]);
     const workQueue = [YOU.orbiting!];
 
-    console.dir(YOU);
 
     while (workQueue.length) {
       const current = workQueue.shift()!;
@@ -83,10 +82,7 @@ class PlanetarySystem {
       }
 
       function pushNewPlanet(planet: Planet) {
-        //   console.log(`Looking at ${planet.name}`);
-        //   console.dir([...distanceFromYou])
         if (!distanceFromYou.has(planet)) {
-          // console.log(`Pushing ${planet.name}`);
           distanceFromYou.set(planet, currentDistance + 1);
           workQueue.push(planet);
         }
