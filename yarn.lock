@@ -116,6 +116,11 @@ find-up@^4.1.0:
     locate-path "^5.0.0"
     path-exists "^4.0.0"
 
+gcd@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/gcd/-/gcd-0.0.1.tgz#41e0bb60bcc9245635419860a22544b230ba2f75"
+  integrity sha1-QeC7YLzJJFY1QZhgoiVEsjC6L3U=
+
 get-caller-file@^2.0.1:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
@@ -125,6 +130,13 @@ is-fullwidth-code-point@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/is-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz#f116f8064fe90b3f7844a38997c0b75051269f1d"
   integrity sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg==
+
+lcm@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/lcm/-/lcm-0.0.3.tgz#4a3b11ce0363e297010806080ffeca02f77f8280"
+  integrity sha1-SjsRzgNj4pcBCAYID/7KAvd/goA=
+  dependencies:
+    gcd "^0.0.1"
 
 locate-path@^5.0.0:
   version "5.0.0"

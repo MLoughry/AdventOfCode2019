@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "ansi-colors": "^4.1.1",
-    "debounce": "^1.2.0"
+    "debounce": "^1.2.0",
+    "lcm": "^0.0.3"
   }
 }
