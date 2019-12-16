@@ -7,6 +7,10 @@ export class CoordinateSet {
     this.coords.set(x, row);
   }
 
+  has(x: number, y: number): boolean {
+        return this.coords.has(x) && this.coords.get(x)!.has(y);
+  }
+
   addRange([ax, ay]: [number, number], [bx, by]: [number, number]) {
     for (let x = Math.min(ax, bx); x <= Math.max(ax, bx); x++) {
       for (let y = Math.min(ay, by); y <= Math.max(ay, by); y++) {
